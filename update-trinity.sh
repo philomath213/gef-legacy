@@ -16,37 +16,31 @@ echo "[+] Starting compilation on ${NB_CPU} core(s)" >&2
 
 pushd .
 
-echo "[+] Installing keystone + bindings" >&2
+echo "[+] Installing keystone" >&2
 pushd /tmp
 git clone --quiet https://github.com/keystone-engine/keystone.git
 mkdir -p keystone/build && cd keystone/build
 sed -i "s/make -j8/make -j${NB_CPU}/g" ../make-share.sh
 ../make-share.sh
 make install
-cd ../bindings/python
-make install install3
 popd
 echo "[+] Done" >&2
 
-echo "[+] Installing capstone + bindings" >&2
+echo "[+] Installing capstone" >&2
 pushd /tmp
 git clone --quiet https://github.com/aquynh/capstone.git
 cd capstone
 ./make.sh default -j${NB_CPU}
 ./make.sh install
-cd ./bindings/python
-make install install3
 popd
 echo "[+] Done" >&2
 
-echo "[+] Installing unicorn + bindings" >&2
+echo "[+] Installing unicorn" >&2
 pushd /tmp
 git clone --quiet https://github.com/unicorn-engine/unicorn.git
 cd unicorn
 UNICORN_QEMU_FLAGS="--python=`which python2`" MAKE_JOBS=${NB_CPU} ./make.sh
 ./make.sh install
-cd ./bindings/python
-make install install3
 popd
 echo "[+] Done" >&2
 
