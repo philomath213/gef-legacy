@@ -6,7 +6,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Publish to Registry
-      uses: elgohr/Publish-Docker-Github-Action@v2.5
+      uses: elgohr/Publish-Docker-Github-Action@2.5
       with:
         name: philomath213/gef-legacy
         username: ${{ secrets.DOCKER_USERNAME }}
