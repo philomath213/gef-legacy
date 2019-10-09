@@ -32,13 +32,14 @@ COPY update-trinity.sh /tmp
 RUN bash /tmp/update-trinity.sh
 
 # cleanup
-RUN rm -rf /tmp/*
+WORKDIR /
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rm -rf /tmp/*
 
 # setup user
 RUN useradd -U -m gef
-RUN rm -rf /home/gef/
-RUN mkdir /home/gef/
+USER gef:gef
+WORKDIR /home/gef/
 
 # setup gef
 COPY gef.py /home/gef/.gdbinit-gef.py
