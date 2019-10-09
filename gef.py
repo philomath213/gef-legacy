@@ -3198,12 +3198,12 @@ def clear_screen(tty=""):
         gdb.execute("shell clear")
         return
 
-    # Since the tty can be closed at any time, a PermissionError exception can
+    # Since the tty can be closed at any time, a OSError exception can
     # occur when `clear_screen` is called. We handle this scenario properly
     try:
         with open(tty, "wt") as f:
             f.write("\x1b[H\x1b[J")
-    except PermissionError:
+    except OSError:
         __gef_redirect_output_fd__ = None
         set_gef_setting("context.redirect", "")
     return
