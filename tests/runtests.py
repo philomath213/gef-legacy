@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 #
 # Run tests by spawning a gdb instance for every command.
 #
@@ -62,15 +62,15 @@ class TestGefCommands(GefUnitTestGeneric): #pylint: disable=too-many-public-meth
 
         target = "tests/binaries/checksec-no-canary.out"
         res = gdb_run_cmd(cmd, target=target)
-        self.assertIn("Canary                        : ✘", res)
+        self.assertIn("Canary                        : x", res)
 
         target = "tests/binaries/checksec-no-nx.out"
         res = gdb_run_cmd(cmd, target=target)
-        self.assertIn("NX                            : ✘", res)
+        self.assertIn("NX                            : x", res)
 
         target = "tests/binaries/checksec-no-pie.out"
         res = gdb_run_cmd(cmd, target=target)
-        self.assertIn("PIE                           : ✘", res)
+        self.assertIn("PIE                           : x", res)
         return
 
     def test_cmd_dereference(self):
@@ -208,7 +208,7 @@ class TestGefCommands(GefUnitTestGeneric): #pylint: disable=too-many-public-meth
         self.assertIn("malloc(16)=", res)
         self.assertIn("calloc(32)=", res)
         addr = int(res.split("calloc(32)=")[1].split("\n")[0], 0)
-        self.assertRegex(res, r"realloc\(.+, 48")
+        self.assertRegexpMatches(res, r"realloc\(.+, 48")
         self.assertIn("free({:#x}".format(addr), res)
         return
 
@@ -245,25 +245,25 @@ class TestGefCommands(GefUnitTestGeneric): #pylint: disable=too-many-public-meth
     def test_cmd_patch_byte(self):
         res = gdb_start_silent_cmd_last_line("patch byte $pc 0xcc", after=["display/8bx $pc",])
         self.assertNoException(res)
-        self.assertRegex(res, r"0xcc\s*0x[^c]{2}")
+        self.assertRegexpMatches(res, r"0xcc\s*0x[^c]{2}")
         return
 
     def test_cmd_patch_word(self):
         res = gdb_start_silent_cmd_last_line("patch word $pc 0xcccc", after=["display/8bx $pc",])
         self.assertNoException(res)
-        self.assertRegex(res, r"(0xcc\s*)(\1)0x[^c]{2}")
+        self.assertRegexpMatches(res, r"(0xcc\s*)(\1)0x[^c]{2}")
         return
 
     def test_cmd_patch_dword(self):
         res = gdb_start_silent_cmd_last_line("patch dword $pc 0xcccccccc", after=["display/8bx $pc",])
         self.assertNoException(res)
-        self.assertRegex(res, r"(0xcc\s*)(\1\1\1)0x[^c]{2}")
+        self.assertRegexpMatches(res, r"(0xcc\s*)(\1\1\1)0x[^c]{2}")
         return
 
     def test_cmd_patch_qword(self):
         res = gdb_start_silent_cmd_last_line("patch qword $pc 0xcccccccccccccccc", after=["display/8bx $pc",])
         self.assertNoException(res)
-        self.assertRegex(res, r"(0xcc\s*)(\1\1\1\1\1\1)0xcc")
+        self.assertRegexpMatches(res, r"(0xcc\s*)(\1\1\1\1\1\1)0xcc")
         return
 
     def test_cmd_patch_qword_symbol(self):
@@ -607,7 +607,7 @@ class TestGdbFunctions(GefUnitTestGeneric):
         self.assertFailIfInactiveSession(gdb_run_cmd(cmd))
         res = gdb_start_silent_cmd(cmd)
         self.assertNoException(res)
-        self.assertRegex(res, r"\+0x0*20: *0x0000000000000000\n")
+        self.assertRegexpMatches(res, r"\+0x0*20: *0x0000000000000000\n")
         return
 
 class TestGefMisc(GefUnitTestGeneric):
