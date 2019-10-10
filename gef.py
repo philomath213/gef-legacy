@@ -1230,13 +1230,10 @@ def gef_makedirs(path, mode=0o755):
     if os.path.isdir(abspath):
         return abspath
 
-    if PYTHON_MAJOR == 3:
-        os.makedirs(path, mode=mode, exist_ok=True) #pylint: disable=unexpected-keyword-arg
-    else:
-        try:
-            os.makedirs(path, mode=mode)
-        except os.error:
-            pass
+    try:
+        os.makedirs(path, mode=mode)
+    except os.error:
+        pass
     return abspath
 
 
@@ -2399,14 +2396,13 @@ class MIPS(Architecture):
 
 def write_memory(address, buffer, length=0x10):
     """Write `buffer` at address `address`."""
-    if PYTHON_MAJOR == 2: buffer = str(buffer)
+    buffer = str(buffer)
     return gdb.selected_inferior().write_memory(address, buffer, length)
 
 
 def read_memory(addr, length=0x10):
     """Return a `length` long byte array with the copy of the process memory at `addr`."""
-    if PYTHON_MAJOR == 2:
-        return gdb.selected_inferior().read_memory(addr, length)
+    return gdb.selected_inferior().read_memory(addr, length)
 
     return gdb.selected_inferior().read_memory(addr, length).tobytes()
 
@@ -2423,7 +2419,7 @@ def read_cstring_from_memory(address, max_length=GEF_MAX_STRING_LENGTH, encoding
     """Return a C-string read from memory."""
 
     if not encoding:
-        encoding = "unicode_escape" if PYTHON_MAJOR==3 else "ascii"
+        encoding = "ascii"
 
     char_ptr = cached_lookup_type("char").pointer()
 
@@ -2828,10 +2824,7 @@ def xor(data, key):
     """Return `data` xor-ed with `key`."""
     key = key.lstrip("0x")
     key = binascii.unhexlify(key)
-    if PYTHON_MAJOR == 2:
-        return b"".join([chr(ord(x) ^ ord(y)) for x, y in zip(data, itertools.cycle(key))])
-
-    return bytearray([x ^ y for x, y in zip(data, itertools.cycle(key))])
+    return b"".join([chr(ord(x) ^ ord(y)) for x, y in zip(data, itertools.cycle(key))])
 
 
 def is_hex(pattern):
