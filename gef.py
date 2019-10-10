@@ -6178,7 +6178,7 @@ class GlibcHeapArenaCommand(GenericCommand):
             return
 
         while True:
-            gef_print("{}".format(arena))
+            gef_print("{}".format(str(arena)))
             arena = arena.get_next()
             if arena is None:
                 break
