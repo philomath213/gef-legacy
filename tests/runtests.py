@@ -617,7 +617,7 @@ class TestGefMisc(GefUnitTestGeneric):
         tempdir = tempfile.mkdtemp()
         update_gef = os.path.join(tempdir, "gef.py")
         subprocess.call(["cp", "/tmp/gef.py", update_gef])
-        status = subprocess.call(["python3", update_gef, "--update"])
+        status = subprocess.call(["python2", update_gef, "--update"])
         self.assertEqual(status, 0)
 
 
