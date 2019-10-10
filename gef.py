@@ -85,63 +85,40 @@ import traceback
 PYTHON_MAJOR = sys.version_info[0]
 
 
-if PYTHON_MAJOR == 2:
-    from HTMLParser import HTMLParser #pylint: disable=import-error
-    from cStringIO import StringIO #pylint: disable=import-error
-    from urllib import urlopen #pylint: disable=no-name-in-module
-    import ConfigParser as configparser #pylint: disable=import-error
-    import xmlrpclib #pylint: disable=import-error
+if PYTHON_MAJOR != 2:
+    raise Exception("python2 only !!")
+    
+from HTMLParser import HTMLParser #pylint: disable=import-error
+from cStringIO import StringIO #pylint: disable=import-error
+from urllib import urlopen #pylint: disable=no-name-in-module
+import ConfigParser as configparser #pylint: disable=import-error
+import xmlrpclib #pylint: disable=import-error
 
-    # Compat Py2/3 hacks
-    def range(*args):
-        """Replace range() builtin with an iterator version."""
-        if len(args) < 1:
-            raise TypeError()
-        start, end, step = 0, args[0], 1
-        if len(args) == 2: start, end = args
-        if len(args) == 3: start, end, step = args
-        for n in itertools.count(start=start, step=step):
-            if (step>0 and n >= end) or (step<0 and n<=end): break
-            yield n
+# Compat Py2/3 hacks
+def range(*args):
+    """Replace range() builtin with an iterator version."""
+    if len(args) < 1:
+        raise TypeError()
+    start, end, step = 0, args[0], 1
+    if len(args) == 2: start, end = args
+    if len(args) == 3: start, end, step = args
+    for n in itertools.count(start=start, step=step):
+        if (step>0 and n >= end) or (step<0 and n<=end): break
+        yield n
 
-    FileNotFoundError = IOError #pylint: disable=redefined-builtin
-    ConnectionRefusedError = socket.error #pylint: disable=redefined-builtin
+FileNotFoundError = IOError #pylint: disable=redefined-builtin
+ConnectionRefusedError = socket.error #pylint: disable=redefined-builtin
 
-    LEFT_ARROW = "<-"
-    RIGHT_ARROW = "->"
-    DOWN_ARROW = "\\->"
-    HORIZONTAL_LINE = "-"
-    VERTICAL_LINE = "|"
-    CROSS = "x"
-    TICK = "v"
-    GEF_PROMPT = "gef> "
-    GEF_PROMPT_ON = "\001\033[1;32m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
-    GEF_PROMPT_OFF = "\001\033[1;31m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
-
-elif PYTHON_MAJOR == 3:
-    from html.parser import HTMLParser #pylint: disable=import-error
-    from io import StringIO
-    from urllib.request import urlopen #pylint: disable=import-error,no-name-in-module
-    import configparser
-    import xmlrpc.client as xmlrpclib #pylint: disable=import-error
-
-    # Compat Py2/3 hack
-    long = int
-    unicode = str
-
-    LEFT_ARROW = " \u2190 "
-    RIGHT_ARROW = " \u2192 "
-    DOWN_ARROW = "\u21b3"
-    HORIZONTAL_LINE = "\u2500"
-    VERTICAL_LINE = "\u2502"
-    CROSS = "\u2718 "
-    TICK = "\u2713 "
-    GEF_PROMPT = "gef\u27a4  "
-    GEF_PROMPT_ON = "\001\033[1;32m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
-    GEF_PROMPT_OFF = "\001\033[1;31m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
-
-else:
-    raise Exception("WTF is this Python version??")
+LEFT_ARROW = "<-"
+RIGHT_ARROW = "->"
+DOWN_ARROW = "\\->"
+HORIZONTAL_LINE = "-"
+VERTICAL_LINE = "|"
+CROSS = "x"
+TICK = "v"
+GEF_PROMPT = "gef> "
+GEF_PROMPT_ON = "\001\033[1;32m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
+GEF_PROMPT_OFF = "\001\033[1;31m\002{0:s}\001\033[0m\002".format(GEF_PROMPT)
 
 
 def http_get(url):
@@ -222,70 +199,68 @@ current_arch = None
 highlight_table = {}
 ANSI_SPLIT_RE = "(\033\[[\d;]*m)"
 
-if PYTHON_MAJOR==3:
-    lru_cache = functools.lru_cache #pylint: disable=no-member
-else:
-    def lru_cache(maxsize = 128):
-        """Port of the Python3 LRU cache mechanism provided by itertools."""
-        class GefLruCache(object):
-            """Local LRU cache for Python2."""
-            def __init__(self, input_func, max_size):
-                self._input_func        = input_func
-                self._max_size          = max_size
-                self._caches_dict       = {}
-                self._caches_info       = {}
-                return
 
-            def cache_info(self, caller=None):
-                """Return a string with statistics of cache usage."""
-                if caller not in self._caches_dict:
-                    return ""
-                hits = self._caches_info[caller]["hits"]
-                missed = self._caches_info[caller]["missed"]
-                cursz = len(self._caches_dict[caller])
-                return "CacheInfo(hits={}, misses={}, maxsize={}, currsize={})".format(hits, missed, self._max_size, cursz)
+def lru_cache(maxsize = 128):
+    """Port of the Python3 LRU cache mechanism provided by itertools."""
+    class GefLruCache(object):
+        """Local LRU cache for Python2."""
+        def __init__(self, input_func, max_size):
+            self._input_func        = input_func
+            self._max_size          = max_size
+            self._caches_dict       = {}
+            self._caches_info       = {}
+            return
 
-            def cache_clear(self, caller=None):
-                """Clear a cache."""
-                if caller in self._caches_dict:
-                    self._caches_dict[caller] = collections.OrderedDict()
-                return
+        def cache_info(self, caller=None):
+            """Return a string with statistics of cache usage."""
+            if caller not in self._caches_dict:
+                return ""
+            hits = self._caches_info[caller]["hits"]
+            missed = self._caches_info[caller]["missed"]
+            cursz = len(self._caches_dict[caller])
+            return "CacheInfo(hits={}, misses={}, maxsize={}, currsize={})".format(hits, missed, self._max_size, cursz)
 
-            def __get__(self, obj, objtype):
-                """Cache getter."""
-                return_func = functools.partial(self._cache_wrapper, obj)
-                return_func.cache_clear = functools.partial(self.cache_clear, obj)
-                return functools.wraps(self._input_func)(return_func)
+        def cache_clear(self, caller=None):
+            """Clear a cache."""
+            if caller in self._caches_dict:
+                self._caches_dict[caller] = collections.OrderedDict()
+            return
 
-            def __call__(self, *args, **kwargs):
-                """Invoking the wrapped function, by attempting to get its value from cache if existing."""
-                return self._cache_wrapper(None, *args, **kwargs)
+        def __get__(self, obj, objtype):
+            """Cache getter."""
+            return_func = functools.partial(self._cache_wrapper, obj)
+            return_func.cache_clear = functools.partial(self.cache_clear, obj)
+            return functools.wraps(self._input_func)(return_func)
 
-            __call__.cache_clear = cache_clear
-            __call__.cache_info  = cache_info
+        def __call__(self, *args, **kwargs):
+            """Invoking the wrapped function, by attempting to get its value from cache if existing."""
+            return self._cache_wrapper(None, *args, **kwargs)
 
-            def _cache_wrapper(self, caller, *args, **kwargs):
-                """Defines the caching mechanism."""
-                kwargs_key = "".join(map(lambda x : str(x) + str(type(kwargs[x])) + str(kwargs[x]), sorted(kwargs)))
-                key = "".join(map(lambda x : str(type(x)) + str(x) , args)) + kwargs_key
-                if caller not in self._caches_dict:
-                    self._caches_dict[caller] = collections.OrderedDict()
-                    self._caches_info[caller] = {"hits":0, "missed":0}
+        __call__.cache_clear = cache_clear
+        __call__.cache_info  = cache_info
 
-                cur_caller_cache_dict = self._caches_dict[caller]
-                if key in cur_caller_cache_dict:
-                    self._caches_info[caller]["hits"] += 1
-                    return cur_caller_cache_dict[key]
+        def _cache_wrapper(self, caller, *args, **kwargs):
+            """Defines the caching mechanism."""
+            kwargs_key = "".join(map(lambda x : str(x) + str(type(kwargs[x])) + str(kwargs[x]), sorted(kwargs)))
+            key = "".join(map(lambda x : str(type(x)) + str(x) , args)) + kwargs_key
+            if caller not in self._caches_dict:
+                self._caches_dict[caller] = collections.OrderedDict()
+                self._caches_info[caller] = {"hits":0, "missed":0}
 
-                self._caches_info[caller]["missed"] += 1
-                if self._max_size is not None:
-                    if len(cur_caller_cache_dict) >= self._max_size:
-                        cur_caller_cache_dict.popitem(False)
-
-                cur_caller_cache_dict[key] = self._input_func(caller, *args, **kwargs) if caller != None else self._input_func(*args, **kwargs)
+            cur_caller_cache_dict = self._caches_dict[caller]
+            if key in cur_caller_cache_dict:
+                self._caches_info[caller]["hits"] += 1
                 return cur_caller_cache_dict[key]
 
-        return lambda input_func: functools.wraps(input_func)(GefLruCache(input_func, maxsize))
+            self._caches_info[caller]["missed"] += 1
+            if self._max_size is not None:
+                if len(cur_caller_cache_dict) >= self._max_size:
+                    cur_caller_cache_dict.popitem(False)
+
+            cur_caller_cache_dict[key] = self._input_func(caller, *args, **kwargs) if caller != None else self._input_func(*args, **kwargs)
+            return cur_caller_cache_dict[key]
+
+    return lambda input_func: functools.wraps(input_func)(GefLruCache(input_func, maxsize))
 
 
 def reset_all_caches():
